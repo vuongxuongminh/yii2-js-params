@@ -1,4 +1,4 @@
-# Yii2 Js Params
+# Yii2 JS Params
 
 [![Latest Stable Version](https://poser.pugx.org/vxm/yii2-js-params/v/stable)](https://packagist.org/packages/vxm/yii2-js-params)
 [![Total Downloads](https://poser.pugx.org/vxm/yii2-js-params/downloads)](https://packagist.org/packages/vxm/yii2-js-params)
@@ -45,7 +45,7 @@ class TestController extends Controller
 }
 ```
 
-And get this data on the frontend side from window.serverParams.
+And get this data on the frontend side from `window.serverParams`:
 
 <p align="center">
     <img src="resource/demo.png" width="100%">
