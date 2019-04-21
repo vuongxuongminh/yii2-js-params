@@ -54,9 +54,6 @@ class TestCase extends BaseTestCase
             'vendorPath' => dirname(__DIR__) . '/vendor',
             'components' => [
                 'view' => [
-                    'params' => [
-                        'jsParams' => ['test' => 'vxm']
-                    ],
                     'renderers' => [
                         'tpl' => 'yii\smarty\ViewRenderer',
                         'twig' => 'yii\twig\ViewRenderer'

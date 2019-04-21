@@ -29,7 +29,7 @@ class ViewRendererTest extends TestCase
                 'a' => 123
             ]
         ]);
-        $this->assertRegExp('/window.params = \{"a":123\}/', $result);
+        $this->assertRegExp('/window.serverParams = \{"a":123\}/', $result);
         $this->assertFalse(isset($view->renderers['php']));
     }
 
@@ -41,7 +41,7 @@ class ViewRendererTest extends TestCase
                 'a' => 123
             ]
         ]);
-        $this->assertRegExp('/window.params = \{"a":123\}/', $result);
+        $this->assertRegExp('/window.serverParams = \{"a":123\}/', $result);
         $this->assertTrue($view->renderers['tpl'] instanceof SmartyRenderer);
     }
 
@@ -53,7 +53,7 @@ class ViewRendererTest extends TestCase
                 'a' => 123
             ]
         ]);
-        $this->assertRegExp('/window.params = \{"a":123\}/', $result);
+        $this->assertRegExp('/window.serverParams = \{"a":123\}/', $result);
         $this->assertTrue($view->renderers['twig'] instanceof TwigRenderer);
     }
 
@@ -62,7 +62,7 @@ class ViewRendererTest extends TestCase
         $view = Yii::$app->getView();
         $view->params['jsParams']['a'] = 123;
         $result = $view->renderFile(__DIR__ . '/view-test.php');
-        $this->assertRegExp('/window.params = \{"a":123\}/', $result);
+        $this->assertRegExp('/window.serverParams = \{"a":123\}/', $result);
 
         $view->params['jsParams'] = function ($_view) use ($view) {
             $this->assertEquals($_view, $view);
@@ -70,6 +70,6 @@ class ViewRendererTest extends TestCase
             return ['a' => 123];
         };
         $result = $view->renderFile(__DIR__ . '/view-test.php');
-        $this->assertRegExp('/window.params = \{"a":123\}/', $result);
+        $this->assertRegExp('/window.serverParams = \{"a":123\}/', $result);
     }
 }
