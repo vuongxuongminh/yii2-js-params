@@ -29,8 +29,8 @@ class ViewRendererTest extends TestCase
                 'a' => 123
             ]
         ]);
-        $this->assertContains('window.params = {"a":123}', $result);
-        $this->assertNull($view->renderers['php'] ?? null);
+        $this->assertRegExp('/window.params = \{"a":123\}/', $result);
+        $this->assertFalse(isset($view->renderers['php']));
     }
 
     public function testSmartyRenderer()
@@ -41,7 +41,7 @@ class ViewRendererTest extends TestCase
                 'a' => 123
             ]
         ]);
-        $this->assertContains('window.params = {"a":123}', $result);
+        $this->assertRegExp('/window.params = \{"a":123\}/', $result);
         $this->assertTrue($view->renderers['tpl'] instanceof SmartyRenderer);
     }
 
@@ -53,7 +53,7 @@ class ViewRendererTest extends TestCase
                 'a' => 123
             ]
         ]);
-        $this->assertContains('window.params = {"a":123}', $result);
+        $this->assertRegExp('/window.params = \{"a":123\}/', $result);
         $this->assertTrue($view->renderers['twig'] instanceof TwigRenderer);
     }
 
