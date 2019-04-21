@@ -81,3 +81,13 @@ Or config an anonymous function:
     ]
 ]
 ```
+
+Now use it on client side:
+
+```html
+<script>
+
+    console.log(window.serverParams.identity);
+
+</script>
+```
