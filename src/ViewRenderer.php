@@ -57,13 +57,17 @@ class ViewRenderer extends BaseViewRenderer implements BootstrapInterface
         $viewId = spl_object_hash($view);
         $ext = pathinfo($file, PATHINFO_EXTENSION);
         /** @var BaseViewRenderer $renderer */
-        $renderer = $view->renderers[$ext] = static::$renderers[$viewId][$ext] ?? null;
+        $renderer = static::$renderers[$viewId][$ext] ?? null;
         $jsParams = ArrayHelper::remove($params, 'jsParams', []);
         static::$jsParams[$viewId] = array_merge(static::$jsParams[$viewId] ?? [], $jsParams);
 
         if ($renderer) {
+            $view->renderers[$ext] = $renderer;
+
             return $renderer->render($view, $file, $params);
         } else {
+            unset($view->renderers[$ext]);
+
             return $view->renderPhpFile($file, $params);
         }
     }
