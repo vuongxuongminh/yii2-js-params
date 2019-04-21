@@ -12,6 +12,7 @@ use Yii;
 use yii\base\BootstrapInterface;
 use yii\base\Event;
 use yii\base\ViewRenderer as BaseViewRenderer;
+use yii\di\Instance;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\web\View;
@@ -26,22 +27,24 @@ class ViewRenderer extends BaseViewRenderer implements BootstrapInterface
 {
 
     /**
-     * @var array store params need to passed to javascript.
-     */
-    protected static $jsParams = [];
-
-    /**
      * @var array store renderer of views with key is hash id of view values is an array store renderer of view ext.
      */
     protected static $renderers = [];
+
+    /**
+     * @var array store params need to passed to javascript.
+     */
+    protected static $jsParams = [];
 
     /**
      * @inheritDoc
      */
     public function bootstrap($app)
     {
-        Event::on(View::class, View::EVENT_BEFORE_RENDER, [$this, 'beforeRender']);
-        Event::on(View::class, View::EVENT_END_PAGE, [$this, 'endPage']);
+        Event::off(View::class, View::EVENT_BEFORE_RENDER, [static::class, 'beforeRender']);
+        Event::off(View::class, View::EVENT_END_PAGE, [static::class, 'endPage']);
+        Event::on(View::class, View::EVENT_BEFORE_RENDER, [static::class, 'beforeRender']);
+        Event::on(View::class, View::EVENT_END_PAGE, [static::class, 'endPage']);
     }
 
     /**
@@ -54,19 +57,14 @@ class ViewRenderer extends BaseViewRenderer implements BootstrapInterface
         $viewId = spl_object_hash($view);
         $ext = pathinfo($file, PATHINFO_EXTENSION);
         /** @var BaseViewRenderer $renderer */
-        $renderer = static::$renderers[$viewId][$ext];
+        $renderer = $view->renderers[$ext] = static::$renderers[$viewId][$ext] ?? null;
         $jsParams = ArrayHelper::remove($params, 'jsParams', []);
+        static::$jsParams[$viewId] = array_merge(static::$jsParams[$viewId] ?? [], $jsParams);
 
-        if (Yii::$app) {
-            $jsParams = array_merge(Yii::$app->params['jsParams'] ?? [], $jsParams);
-        }
-
-        static::$jsParams[$viewId] = $jsParams;
-
-        if ($renderer instanceof self) {
-            return $view->renderPhpFile($file, $params);
-        } else {
+        if ($renderer) {
             return $renderer->render($view, $file, $params);
+        } else {
+            return $view->renderPhpFile($file, $params);
         }
     }
 
@@ -74,15 +72,20 @@ class ViewRenderer extends BaseViewRenderer implements BootstrapInterface
      * Event trigger for make this class is the renderer of view file.
      *
      * @param Event|\yii\base\ViewEvent $event triggered.
+     * @throws \yii\base\InvalidConfigException
      */
-    public function beforeRender(Event $event)
+    static public function beforeRender(Event $event): void
     {
         /** @var View $view */
         $view = $event->sender;
         $viewId = spl_object_hash($view);
         $ext = pathinfo($event->viewFile, PATHINFO_EXTENSION);
 
-        static::$renderers[$viewId][$ext] = $view->renderers[$ext] ?? $this;
+        if (isset($view->renderers[$ext])) {
+            static::$renderers[$viewId][$ext] = Instance::ensure($view->renderers[$ext], BaseViewRenderer::class);
+        }
+
+        $view->renderers[$ext] = new static;
     }
 
     /**
@@ -90,15 +93,15 @@ class ViewRenderer extends BaseViewRenderer implements BootstrapInterface
      *
      * @param Event $event triggered.
      */
-    public function endPage(Event $event)
+    static public function endPage(Event $event): void
     {
         /** @var View $view */
         $view = $event->sender;
         $viewId = spl_object_hash($view);
         $jsParams = ArrayHelper::remove(static::$jsParams, $viewId, []);
+        $jsParams = array_merge(Yii::$app->params['jsParams'] ?? [], $jsParams);
 
         $view->registerJs('window.params = ' . Json::htmlEncode($jsParams), VIEW::POS_HEAD);
     }
-
 
 }
