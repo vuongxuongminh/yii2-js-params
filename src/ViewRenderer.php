@@ -74,7 +74,7 @@ class ViewRenderer extends BaseViewRenderer implements BootstrapInterface
      * @param Event|\yii\base\ViewEvent $event triggered.
      * @throws \yii\base\InvalidConfigException
      */
-    static public function beforeRender(Event $event): void
+    public static function beforeRender(Event $event): void
     {
         /** @var View $view */
         $view = $event->sender;
@@ -93,7 +93,7 @@ class ViewRenderer extends BaseViewRenderer implements BootstrapInterface
      *
      * @param Event $event triggered.
      */
-    static public function endPage(Event $event): void
+    public static function endPage(Event $event): void
     {
         /** @var View $view */
         $view = $event->sender;
