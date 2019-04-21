@@ -98,10 +98,16 @@ class ViewRenderer extends BaseViewRenderer implements BootstrapInterface
         /** @var View $view */
         $view = $event->sender;
         $viewId = spl_object_hash($view);
-        $jsParams = ArrayHelper::remove(static::$jsParams, $viewId, []);
-        $jsParams = array_merge(Yii::$app->params['jsParams'] ?? [], $jsParams);
+        $globalParams = $view->params['jsParams'] ?? [];
 
-        $view->registerJs('window.params = ' . Json::htmlEncode($jsParams), VIEW::POS_HEAD);
+        if (is_callable($globalParams)) {
+            $globalParams = call_user_func($globalParams, $view);
+        }
+
+        $jsParams = ArrayHelper::remove(static::$jsParams, $viewId, []);
+        $jsParams = array_merge($globalParams, $jsParams);
+
+        $view->registerJs('window.serverParams = ' . Json::htmlEncode($jsParams), VIEW::POS_HEAD);
     }
 
 }

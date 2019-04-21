@@ -57,4 +57,19 @@ class ViewRendererTest extends TestCase
         $this->assertTrue($view->renderers['twig'] instanceof TwigRenderer);
     }
 
+    public function testGlobalParams()
+    {
+        $view = Yii::$app->getView();
+        $view->params['jsParams']['a'] = 123;
+        $result = $view->renderFile(__DIR__ . '/view-test.php');
+        $this->assertRegExp('/window.params = \{"a":123\}/', $result);
+
+        $view->params['jsParams'] = function ($_view) use ($view) {
+            $this->assertEquals($_view, $view);
+
+            return ['a' => 123];
+        };
+        $result = $view->renderFile(__DIR__ . '/view-test.php');
+        $this->assertRegExp('/window.params = \{"a":123\}/', $result);
+    }
 }
